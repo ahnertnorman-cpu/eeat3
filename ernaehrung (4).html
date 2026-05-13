@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Ernährung"/>
+<meta name="theme-color" content="#f7f3eb"/>
+<title>Ernährung</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100vh;background:#f7f3eb;color:#1a1a1a;font-family:Georgia,serif;overscroll-behavior:none}
+#hdr{position:sticky;top:0;z-index:50;background:#fffdf6;border-bottom:2.5px solid #1a1a1a;padding:calc(env(safe-area-inset-top,0px)+10px) 18px 12px}
+.dnav{display:flex;align-items:center;gap:6px;margin-bottom:11px}
+.dnavbtn{background:#fff;border:2px solid #1a1a1a;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;color:#1a1a1a;flex-shrink:0;box-shadow:2px 2px 0 #1a1a1a;font-family:inherit}
+.dnavbtn:active{box-shadow:none;transform:translate(2px,2px)}
+.dnavlbl{flex:1;text-align:center;font-size:13px;font-weight:700}
+.dtodaybtn{background:#e8c97a;border:2px solid #1a1a1a;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;color:#1a1a1a;box-shadow:2px 2px 0 #1a1a1a;flex-shrink:0;display:none}
+.dtodaybtn:active{box-shadow:none;transform:translate(2px,2px)}
+.mac-wrap{background:#fff;border:2px solid #1a1a1a;border-radius:12px;padding:12px 13px;box-shadow:3px 3px 0 #1a1a1a}
+.mac-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.mac-kcal{font-size:28px;font-weight:900;line-height:1}
+.mac-kcal-goal{font-size:12px;color:#999}
+.mac-kcal-bar{height:8px;background:#ede9e2;border-radius:4px;border:2px solid #1a1a1a;overflow:hidden;margin-bottom:11px}
+.mac-kcal-fill{height:100%;background:#d4a800;border-radius:2px;transition:width .3s}
+.mac-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 16px}
+.mac-lbl{font-size:10px;color:#999;margin-bottom:3px;display:flex;justify-content:space-between;align-items:baseline}
+.mac-lbl b{font-size:12px}
+.mac-bar{height:6px;background:#ede9e2;border-radius:3px;border:1.5px solid #1a1a1a;overflow:hidden}
+.mac-fill{height:100%;border-radius:2px;transition:width .3s}
+#tw{max-width:600px;margin:0 auto;padding:14px 18px 0}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tbtn{flex:1;padding:9px 4px;border-radius:10px;border:2.5px solid #1a1a1a;background:#fff;color:#1a1a1a;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:3px 3px 0 #1a1a1a}
+.tbtn.on{background:#1a1a1a;color:#f7f3eb;box-shadow:none;transform:translate(3px,3px)}
+#content{max-width:600px;margin:0 auto;padding:0 18px 80px}
+.cc{background:#fff;border:2.5px solid #1a1a1a;border-radius:13px;overflow:hidden;margin-bottom:10px;box-shadow:4px 4px 0 #1a1a1a}
+.ch{display:flex;align-items:center;gap:9px;padding:13px 15px;cursor:pointer;user-select:none}
+.cemoji{font-size:18px;flex-shrink:0}
+.cname{flex:1;font-size:14px;font-weight:700}
+.csum{font-size:11px;font-weight:700;margin-right:4px}
+.carr{color:#999;font-size:12px;transition:transform .2s;display:inline-block}
+.citems{border-top:2px solid #1a1a1a;display:none}
+.citems.open{display:block}
+.sub-hdr{padding:6px 15px 4px;background:#f5f1ea;border-top:1.5px solid #ede9e2;font-size:10px;font-weight:700;color:#888;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:5px}
+.irow{display:flex;align-items:center;gap:9px;padding:10px 15px}
+.irow+.irow{border-top:1.5px solid #ede9e2}
+.iemoji{font-size:15px;flex-shrink:0;width:22px;text-align:center}
+.iname{flex:1;min-width:0}
+.ilbl{font-size:13px;color:#bbb;line-height:1.3}
+.icalc{text-align:right;flex-shrink:0;margin-right:7px;display:none}
+.ick{font-size:12px;color:#b08800;font-weight:700}
+.icp{font-size:10px;color:#2a8a50;font-weight:700}
+.iinp{width:62px;padding:6px 7px;background:#fff;border:2px solid #ccc;border-radius:8px;color:#1a1a1a;font-size:13px;font-weight:700;font-family:inherit;outline:none;text-align:right;-webkit-appearance:none;box-shadow:2px 2px 0 #ddd}
+.iinp:focus{border-color:#1a1a1a;box-shadow:2px 2px 0 #1a1a1a}
+.iunit{font-size:10px;color:#bbb;width:14px;flex-shrink:0}
+.wcard{background:#fff;border:2.5px solid #1a1a1a;border-radius:13px;padding:14px 15px;margin-bottom:10px;box-shadow:4px 4px 0 #1a1a1a}
+.wtit{font-size:11px;color:#999;font-weight:700;margin-bottom:12px;letter-spacing:.06em;text-transform:uppercase}
+.bchart{display:flex;gap:5px;align-items:flex-end;height:64px}
+.bcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bnum{font-size:8px;color:#bbb;min-height:11px;text-align:center;font-weight:700}
+.bbar{width:100%;border-radius:3px 3px 0 0}
+.blbl{font-size:9px;color:#ccc;font-weight:700}.blbl.td{color:#1a1a1a}
+.wt-row{margin-bottom:12px}.wt-row:last-child{margin-bottom:0}
+.wt-head{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.wt-emoji{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+.wt-name{flex:1;font-size:12px;color:#666;font-weight:700}
+.wt-num{font-size:15px;font-weight:900}
+.wt-goal{font-size:10px;color:#aaa;margin-left:3px;font-weight:600}
+.wt-track{height:6px;background:#ede9e2;border-radius:4px;border:1.5px solid #1a1a1a;overflow:hidden;position:relative;margin-bottom:5px}
+.wt-fill{height:100%;border-radius:3px;transition:width .5s}
+.wt-min-marker{position:absolute;top:0;bottom:0;width:2px;background:#1a1a1a;opacity:.2}
+.ddots{display:flex;gap:4px}
+.ddw{flex:1;text-align:center}
+.dd{width:100%;aspect-ratio:1;border-radius:5px;background:#ede9e2;border:1.5px solid transparent}
+.ddl{font-size:8px;margin-top:2px;color:#ccc;font-weight:700}.ddl.td{color:#1a1a1a}
+.slbl{font-size:10px;color:#999;letter-spacing:.14em;text-transform:uppercase;margin-bottom:13px;font-weight:700}
+.mcard{background:#fff;border:2.5px solid #1a1a1a;border-radius:13px;padding:14px 15px;margin-bottom:10px;box-shadow:4px 4px 0 #1a1a1a}
+.mctit{font-size:11px;color:#999;font-weight:700;margin-bottom:13px;letter-spacing:.06em;text-transform:uppercase}
+.kstrip{display:flex;gap:3px;align-items:flex-end;height:48px}
+.kbar{flex:1;border-radius:2px 2px 0 0}
+.slabs{display:flex;justify-content:space-between;margin-top:5px}
+.slab{font-size:9px;color:#bbb;font-weight:700}
+.month-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}.month-row:last-child{margin-bottom:0}
+.month-cat-label{width:108px;flex-shrink:0;display:flex;align-items:center;gap:5px;font-size:11px;color:#666;font-weight:700;overflow:hidden}
+.month-weeks{display:flex;gap:5px;flex:1}
+.mw-cell{flex:1;border-radius:7px;height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900}
+.month-week-hdrs{display:flex;margin-bottom:6px;margin-left:116px;gap:5px}
+.mw-hdr{flex:1;font-size:9px;color:#aaa;text-align:center;font-weight:700}
+.hintbanner{background:#fffbf0;border:2.5px solid #d4a800;border-radius:12px;padding:12px 14px;font-size:12px;color:#666;margin-bottom:14px;line-height:1.7;box-shadow:3px 3px 0 #d4a800}
+.hintbanner strong{color:#a07800;font-weight:800}
+.hintclose{float:right;background:none;border:none;color:#aaa;font-size:16px;cursor:pointer;padding:0;margin:-2px -2px 0 8px}
+.mic-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.mic-row:last-child{margin-bottom:0}
+.mic-icon{font-size:14px;flex-shrink:0;width:20px;text-align:center}
+.mic-body{flex:1;min-width:0}
+.mic-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px}
+.mic-name{font-size:11px;font-weight:700}
+.mic-pct{font-size:10px;font-weight:700}
+.mic-track{height:5px;background:#ede9e2;border-radius:3px;border:1.5px solid #ccc;overflow:hidden}
+.mic-fill{height:100%;border-radius:2px;transition:width .5s}
+</style>
+</head>
+<body>
+<div id="hdr">
+  <div style="max-width:600px;margin:0 auto">
+    <div class="dnav">
+      <button class="dnavbtn" id="prevday">◀</button>
+      <div class="dnavlbl" id="dlbl"></div>
+      <button class="dtodaybtn" id="todaybtn" onclick="goToday()">Heute</button>
+      <button class="dnavbtn" id="nextday">▶</button>
+    </div>
+    <div class="mac-wrap" id="macwrap"></div>
+  </div>
+</div>
+<div id="tw"><div class="tabs" id="tabs"></div></div>
+<div id="content"></div>
+
+<script>
+"use strict";
+const GOALS={kcal:2000,protein:160,kh:160,fett:65,fiber:30};
+const MDEFS=[
+  {k:"kcal",   lbl:"Kalorien",      u:"kcal",c:"#c49a00"},
+  {k:"protein",lbl:"Protein",       u:"g",   c:"#1a7a40"},
+  {k:"kh",     lbl:"Kohlenhydrate", u:"g",   c:"#1a50aa"},
+  {k:"fett",   lbl:"Fett",          u:"g",   c:"#c04020"},
+  {k:"fiber",  lbl:"Ballaststoffe", u:"g",   c:"#6a20b0"},
+];
+const DNM=["Mo","Di","Mi","Do","Fr","Sa","So"];
+
+// portionMin = grams needed per 1 portion (accumulative within day across all items in cat)
+// weekly targets derived from daily targets × 7
+const CATS=[
+  {id:"fleisch",label:"Fleisch",emoji:"🥩",accent:"#c04020",weekMin:4,weekMax:7,items:[
+    {id:"huehn", name:"Hühnerbrust",  emoji:"🍗",kcal100:110,prot100:23, kh100:0,  fett100:1.2,fib100:0,  hint:150,portionMin:100},
+    {id:"rind8", name:"Rinderhack 8%",emoji:"🥩",kcal100:150,prot100:20, kh100:0,  fett100:8,  fib100:0,  hint:150,portionMin:100},
+    {id:"rindf", name:"Rinderfilet",  emoji:"🥩",kcal100:160,prot100:22, kh100:0,  fett100:8,  fib100:0,  hint:150,portionMin:100},
+  ]},
+  {id:"eier",label:"Eier",emoji:"🥚",accent:"#aa7010",weekMin:6,weekMax:9,items:[
+    {id:"ei",name:"Ei (1 Stk ≈ 60g)",emoji:"🥚",kcal100:155,prot100:13,kh100:1.1,fett100:11,fib100:0,hint:60,portionMin:60},
+  ]},
+  {id:"fisch",label:"Fisch",emoji:"🐟",accent:"#1a60aa",weekMin:2,weekMax:4,items:[
+    {id:"lachs",name:"Lachs",            emoji:"🍣",kcal100:208,prot100:20,kh100:0,fett100:13,fib100:0,hint:150,portionMin:100},
+    {id:"sard", name:"Sardinen",         emoji:"🐟",kcal100:190,prot100:22,kh100:0,fett100:11,fib100:0,hint:100,portionMin:100},
+    {id:"thun", name:"Thunfisch (Dose)", emoji:"🐠",kcal100:116,prot100:26,kh100:0,fett100:1, fib100:0,hint:100,portionMin:100},
+    {id:"wolfb",name:"Wolfsbarsch",      emoji:"🐡",kcal100:97, prot100:19,kh100:0,fett100:2, fib100:0,hint:150,portionMin:100},
+  ]},
+  {id:"pflanzen",label:"Pflanzl. Protein",emoji:"🌿",accent:"#3a7a20",weekMin:2,weekMax:4,items:[
+    {id:"tempeh",name:"Tempeh",emoji:"🌿",kcal100:193,prot100:19, kh100:9,  fett100:11, fib100:1.4,hint:100,portionMin:100},
+    {id:"tofu",  name:"Tofu",  emoji:"🫘",kcal100:76, prot100:8,  kh100:1.9,fett100:4.8,fib100:0.3,hint:150,portionMin:100},
+  ]},
+  {id:"milch",label:"Milchprodukte",emoji:"🥛",accent:"#7a6030",weekMin:24,weekMax:35,items:[
+    {id:"harzer",name:"Harzer Käse",     emoji:"🧀",kcal100:125,prot100:30, kh100:0,  fett100:0.7,fib100:0,hint:50, portionMin:100},
+    {id:"huett", name:"Hüttenkäse",      emoji:"🧀",kcal100:85, prot100:11, kh100:3.4,fett100:4,  fib100:0,hint:150,portionMin:100},
+    {id:"jogh",  name:"Joghurt",         emoji:"🫙",kcal100:61, prot100:3.5,kh100:4.7,fett100:3.5,fib100:0,hint:150,portionMin:100},
+    {id:"milchp",name:"Milch",           emoji:"🥛",kcal100:64, prot100:3.3,kh100:4.8,fett100:3.5,fib100:0,hint:200,portionMin:100},
+    {id:"parm",  name:"Parmesan",        emoji:"🧀",kcal100:431,prot100:38, kh100:0,  fett100:29, fib100:0,hint:20, portionMin:100},
+    {id:"skyr",  name:"Skyr",            emoji:"🍦",kcal100:67, prot100:11, kh100:4,  fett100:0.2,fib100:0,hint:150,portionMin:100},
+    {id:"whey",  name:"Whey Protein (80%)",emoji:"💪",kcal100:370,prot100:75,kh100:6,fett100:5,  fib100:0,hint:30, portionMin:100},
+  ]},
+  {id:"huels",label:"Hülsenfrüchte",emoji:"🫘",accent:"#7a5010",weekMin:5,weekMax:8,items:[
+    {id:"edamame",name:"Edamame",                   emoji:"🟢",kcal100:122,prot100:11, kh100:9, fett100:5.2,fib100:5.2,hint:100,portionMin:50},
+    {id:"erbsen", name:"Erbsen (TK/frisch)",         emoji:"🫛",kcal100:81, prot100:5.4,kh100:11,fett100:0.4,fib100:5.0,hint:100,portionMin:50},
+    {id:"kicher", name:"Kichererbsen (roh/trocken)", emoji:"🟡",kcal100:364,prot100:19, kh100:60,fett100:6,  fib100:17, hint:60, portionMin:50},
+    {id:"kidney", name:"Kidneybohnen (roh/trocken)", emoji:"🔴",kcal100:333,prot100:24, kh100:60,fett100:1.5,fib100:16, hint:60, portionMin:50},
+    {id:"linsen", name:"Linsen (roh/trocken)",        emoji:"🟤",kcal100:353,prot100:25, kh100:60,fett100:1.9,fib100:31, hint:60, portionMin:50},
+    {id:"schbohn",name:"Schwarze Bohnen (roh/tr.)",  emoji:"⚫",kcal100:341,prot100:21, kh100:62,fett100:1.5,fib100:16, hint:60, portionMin:50},
+    {id:"weibohn",name:"Weiße Bohnen (roh/trocken)", emoji:"⚪",kcal100:340,prot100:22, kh100:60,fett100:1.5,fib100:16, hint:60, portionMin:50},
+  ]},
+  {id:"ferm",label:"Fermentiertes",emoji:"🧫",accent:"#1a7a60",weekMin:5,weekMax:7,items:[
+    {id:"kefir",   name:"Kefir",     emoji:"🥛",kcal100:61,prot100:3.2,kh100:4.8,fett100:3.5,fib100:0,  hint:200,portionMin:100},
+    {id:"kombucha",name:"Kombucha",  emoji:"🍵",kcal100:9, prot100:0,  kh100:2.2,fett100:0,  fib100:0,  hint:250,portionMin:100},
+    {id:"sauerk",  name:"Sauerkraut",emoji:"🫙",kcal100:19,prot100:0.9,kh100:1.8,fett100:0.1,fib100:2.5,hint:80, portionMin:100},
+  ]},
+  {id:"tee",label:"Grüner Tee",emoji:"🍵",accent:"#1a8050",weekMin:5,weekMax:7,items:[
+    {id:"gruentee",name:"Grüner Tee",emoji:"🍵",kcal100:1,prot100:0.2,kh100:0.2,fett100:0,fib100:0,hint:250,portionMin:200,unit:"ml"},
+  ]},
+  {id:"gem",label:"Gemüse",emoji:"🥦",accent:"#1a8030",weekMin:24,weekMax:35,items:[
+    {id:"aubg",   name:"Aubergine",   emoji:"🍆",kcal100:25, prot100:1.0,kh100:3.6, fett100:0.2,fib100:2.5,hint:150,portionMin:100},
+    {id:"avoc",   name:"Avocado",     emoji:"🥑",kcal100:160,prot100:2.0,kh100:2,   fett100:15, fib100:6.7,hint:100,portionMin:100},
+    {id:"blumk",  name:"Blumenkohl",  emoji:"🥦",kcal100:25, prot100:1.9,kh100:3.8, fett100:0.3,fib100:2.0,hint:150,portionMin:100},
+    {id:"doset",  name:"Dosentomaten",emoji:"🥫",kcal100:20, prot100:1.0,kh100:3.5, fett100:0.2,fib100:1.5,hint:200,portionMin:100},
+    {id:"gkohl",  name:"Grünkohl",    emoji:"🥬",kcal100:49, prot100:4.3,kh100:4.2, fett100:0.9,fib100:3.6,hint:100,portionMin:100},
+    {id:"ingw",   name:"Ingwer",      emoji:"🫚",kcal100:80, prot100:1.8,kh100:18,  fett100:0.8,fib100:2.0,hint:10, portionMin:100},
+    {id:"karr",   name:"Karotten",    emoji:"🥕",kcal100:41, prot100:0.9,kh100:8,   fett100:0.2,fib100:2.8,hint:100,portionMin:100},
+    {id:"kart",   name:"Kartoffel",   emoji:"🥔",kcal100:77, prot100:2.0,kh100:17,  fett100:0.1,fib100:2.1,hint:200,portionMin:100},
+    {id:"knobl",  name:"Knoblauch",   emoji:"🧄",kcal100:149,prot100:6.4,kh100:33,  fett100:0.5,fib100:2.1,hint:10, portionMin:100},
+    {id:"kohl",   name:"Kohl",        emoji:"🥬",kcal100:27, prot100:1.5,kh100:5,   fett100:0.1,fib100:2.5,hint:100,portionMin:100},
+    {id:"kohlr",  name:"Kohlrabi",    emoji:"🥦",kcal100:27, prot100:1.8,kh100:4.4, fett100:0.1,fib100:1.8,hint:100,portionMin:100},
+    {id:"kuerbis",name:"Kürbis",      emoji:"🎃",kcal100:26, prot100:1.0,kh100:5,   fett100:0.1,fib100:0.5,hint:150,portionMin:100},
+    {id:"lauch",  name:"Lauch",       emoji:"🌿",kcal100:31, prot100:1.8,kh100:5,   fett100:0.3,fib100:1.8,hint:100,portionMin:100},
+    {id:"papr",   name:"Paprika",     emoji:"🫑",kcal100:31, prot100:1.0,kh100:6,   fett100:0.3,fib100:1.6,hint:100,portionMin:100},
+    {id:"pommes", name:"Pommes",       emoji:"🍟",kcal100:312,prot100:3.5,kh100:41,  fett100:15, fib100:3.0,hint:200,portionMin:100},
+    {id:"rbeet",  name:"Rote Beete",  emoji:"🫚",kcal100:43, prot100:1.6,kh100:8.8, fett100:0.1,fib100:2.0,hint:100,portionMin:100},
+    {id:"rosenk", name:"Rosenkohl",   emoji:"🥦",kcal100:43, prot100:3.4,kh100:5,   fett100:0.5,fib100:3.8,hint:100,portionMin:100},
+    {id:"sparg",  name:"Spargel",     emoji:"🌱",kcal100:20, prot100:2.2,kh100:1.8, fett100:0.1,fib100:2.1,hint:150,portionMin:100},
+    {id:"spin",   name:"Spinat",      emoji:"🌿",kcal100:23, prot100:2.9,kh100:1.4, fett100:0.4,fib100:2.2,hint:100,portionMin:100},
+    {id:"swkart", name:"Süßkartoffel",emoji:"🍠",kcal100:86, prot100:1.6,kh100:20,  fett100:0.1,fib100:2.5,hint:200,portionMin:100},
+    {id:"tom",    name:"Tomaten",     emoji:"🍅",kcal100:18, prot100:0.9,kh100:3.5, fett100:0.2,fib100:1.2,hint:150,portionMin:100},
+    {id:"zucc",   name:"Zucchini",    emoji:"🥒",kcal100:17, prot100:1.2,kh100:2.7, fett100:0.3,fib100:1.1,hint:150,portionMin:100},
+    {id:"zwieb",  name:"Zwiebel",     emoji:"🧅",kcal100:40, prot100:1.1,kh100:9,   fett100:0.1,fib100:1.7,hint:80, portionMin:100},
+  ]},
+  {id:"obst",label:"Obst",emoji:"🍎",accent:"#aa2020",weekMin:12,weekMax:16,items:[
+    {id:"apf",  name:"Apfel",            emoji:"🍎",kcal100:52,prot100:0.3,kh100:12,fett100:0.2,fib100:2.4,hint:150,portionMin:100},
+    {id:"ban",  name:"Banane",           emoji:"🍌",kcal100:89,prot100:1.1,kh100:20,fett100:0.3,fib100:2.6,hint:120,portionMin:100},
+    {id:"beer", name:"Beeren (Mischung)",emoji:"🫐",kcal100:45,prot100:0.8,kh100:9, fett100:0.5,fib100:5.0,hint:150,portionMin:100},
+    {id:"grape",name:"Grapefruit",       emoji:"🍋",kcal100:42,prot100:0.8,kh100:9, fett100:0.1,fib100:1.7,hint:150,portionMin:100},
+    {id:"kiwi", name:"Kiwi",            emoji:"🥝",kcal100:61,prot100:1.1,kh100:12,fett100:0.5,fib100:3.0,hint:80, portionMin:100},
+    {id:"mand", name:"Mandarine",        emoji:"🍊",kcal100:53,prot100:0.8,kh100:11,fett100:0.2,fib100:1.8,hint:80, portionMin:100},
+    {id:"mango",name:"Mango",            emoji:"🥭",kcal100:60,prot100:0.8,kh100:13,fett100:0.4,fib100:1.6,hint:150,portionMin:100},
+    {id:"melon",name:"Melone",           emoji:"🍈",kcal100:34,prot100:0.8,kh100:8, fett100:0.2,fib100:0.4,hint:200,portionMin:100},
+    {id:"orang",name:"Orange",           emoji:"🍊",kcal100:47,prot100:0.9,kh100:10,fett100:0.1,fib100:2.5,hint:130,portionMin:100},
+    {id:"pflm", name:"Pflaume",          emoji:"🍑",kcal100:46,prot100:0.7,kh100:10,fett100:0.1,fib100:1.4,hint:60, portionMin:100},
+    {id:"trb",  name:"Traube",           emoji:"🍇",kcal100:69,prot100:0.7,kh100:15,fett100:0.4,fib100:0.9,hint:150,portionMin:100},
+  ]},
+  {id:"salat",label:"Salat & Sprossen",emoji:"🥗",accent:"#3a7010",weekMin:10,weekMax:14,items:[
+    {id:"chic",  name:"Chicorée",  emoji:"🥬",kcal100:17,prot100:0.9,kh100:2.5,fett100:0.2,fib100:1.8,hint:80, portionMin:100},
+    {id:"felds", name:"Feldsalat", emoji:"🌿",kcal100:23,prot100:2.0,kh100:2.5,fett100:0.4,fib100:1.5,hint:50, portionMin:100},
+    {id:"gurke", name:"Gurke",     emoji:"🥒",kcal100:16,prot100:0.7,kh100:2.5,fett100:0.1,fib100:0.6,hint:100,portionMin:100},
+    {id:"radic", name:"Radicchio", emoji:"🥬",kcal100:23,prot100:1.4,kh100:3.6,fett100:0.2,fib100:1.5,hint:80, portionMin:100},
+    {id:"radies",name:"Radieschen",emoji:"🌶️",kcal100:16,prot100:0.7,kh100:2.5,fett100:0.1,fib100:1.6,hint:50, portionMin:100},
+    {id:"roman", name:"Romana",    emoji:"🥬",kcal100:17,prot100:1.2,kh100:2.4,fett100:0.3,fib100:1.3,hint:80, portionMin:100},
+    {id:"rucol", name:"Rucola",    emoji:"🥗",kcal100:25,prot100:2.6,kh100:2.0,fett100:0.7,fib100:1.6,hint:50, portionMin:100},
+    {id:"spross",name:"Sprossen",  emoji:"🌱",kcal100:30,prot100:3.0,kh100:3.0,fett100:0.5,fib100:2.0,hint:50, portionMin:50},
+  ]},
+  {id:"nuesse",label:"Nüsse & Samen",emoji:"🥜",accent:"#7a5020",weekMin:12,weekMax:18,items:[
+    {id:"nussm", name:"Nussmix",                         emoji:"🥜",kcal100:620,prot100:16,kh100:12,fett100:55,fib100:7, hint:30,portionMin:20},
+    {id:"samenm",name:"Samenmix (Chia/Hanf/Lein/Kürbis)",emoji:"🌻",kcal100:500,prot100:20,kh100:15,fett100:35,fib100:25,hint:20,portionMin:30},
+  ]},
+  {id:"getreide",label:"Getreide & Nudeln",emoji:"🌾",accent:"#8a6800",weekMin:3,weekMax:5,items:[
+    {id:"buchw",     name:"Buchweizen",               emoji:"🌾",kcal100:343,prot100:13,kh100:71,fett100:3,  fib100:10, hint:60, portionMin:100},
+    {id:"dinkn",     name:"Dinkelnudeln (trocken)",   emoji:"🍝",kcal100:350,prot100:13,kh100:68,fett100:2,  fib100:5.5,hint:80, portionMin:100},
+    {id:"hafer",     name:"Hafer (trocken)",           emoji:"🌾",kcal100:389,prot100:17,kh100:66,fett100:7,  fib100:10, hint:60, portionMin:100},
+    {id:"nudeln",    name:"Nudeln klassisch (trocken)",emoji:"🍝",kcal100:355,prot100:12,kh100:71,fett100:1.5,fib100:2.5,hint:80, portionMin:100},
+    {id:"quinoa",    name:"Quinoa (trocken)",          emoji:"🌾",kcal100:368,prot100:14,kh100:64,fett100:6,  fib100:2.8,hint:60, portionMin:100},
+    {id:"roggen",    name:"Roggenbrot",                emoji:"🍞",kcal100:220,prot100:7, kh100:43,fett100:2,  fib100:5.0,hint:80, portionMin:100},
+    {id:"sauertbrot",name:"Sauerteigbrot",             emoji:"🍞",kcal100:230,prot100:8, kh100:45,fett100:1.5,fib100:4.0,hint:80, portionMin:100},
+  ]},
+  {id:"oele",label:"Öle & Fette",emoji:"🫙",accent:"#8a5800",weekMin:6,weekMax:9,items:[
+    {id:"butter",   name:"Butter",   emoji:"🧈",kcal100:741,prot100:0.7,kh100:0.6,fett100:83, fib100:0,hint:15,portionMin:10},
+    {id:"kokosfett",name:"Kokosfett",emoji:"🥥",kcal100:862,prot100:0,  kh100:0,  fett100:99, fib100:0,hint:15,portionMin:10},
+    {id:"olivenoel",name:"Olivenöl", emoji:"🫒",kcal100:884,prot100:0,  kh100:0,  fett100:100,fib100:0,hint:15,portionMin:10},
+  ]},
+  {id:"alkohol",label:"Alkohol",emoji:"🍺",accent:"#8a3070",weekMin:0,weekMax:3,isTreat:true,items:[
+    {id:"bier",   name:"Bier",   emoji:"🍺",kcal100:43, prot100:0.5,kh100:3.5,fett100:0,fib100:0,hint:330,portionMin:330,unit:"ml"},
+    {id:"negroni",name:"Negroni",emoji:"🍸",kcal100:210,prot100:0,  kh100:4,  fett100:0,fib100:0,hint:80, portionMin:80, unit:"ml"},
+    {id:"vodka",  name:"Vodka",  emoji:"🥃",kcal100:231,prot100:0,  kh100:0,  fett100:0,fib100:0,hint:40, portionMin:40, unit:"ml"},
+    {id:"wein",   name:"Wein",   emoji:"🍷",kcal100:85, prot100:0.1,kh100:2.5,fett100:0,fib100:0,hint:150,portionMin:150,unit:"ml"},
+  ]},
+  {id:"suesses",label:"Süßes & Salziges",emoji:"🍰",accent:"#c03080",weekMin:0,weekMax:3,isTreat:true,items:[
+    {id:"chips",     name:"Chips",      emoji:"🥔",kcal100:536,prot100:6,  kh100:53,fett100:34,fib100:4,hint:50, portionMin:50},
+    {id:"eis",       name:"Eis",        emoji:"🍦",kcal100:200,prot100:3.5,kh100:25,fett100:10,fib100:0,hint:100,portionMin:50},
+    {id:"kuchen",    name:"Kuchen",     emoji:"🎂",kcal100:350,prot100:5,  kh100:50,fett100:15,fib100:1,hint:100,portionMin:50},
+    {id:"salzstange",name:"Salzstangen",emoji:"🥨",kcal100:380,prot100:10, kh100:76,fett100:3, fib100:2,hint:50, portionMin:50},
+  ]},
+];
+
+// Protein combined view in today tab
+const PROTEIN_CATIDS=["fleisch","eier","fisch","pflanzen","milch"];
+const PROT_ACCENT="#b03020";
+const PROT_ID="prot"; // base ID for DOM elements
+
+const ALLITEMS=CATS.flatMap(c=>c.items.map(i=>({...i,catId:c.id})));
+const IMAP=Object.fromEntries(ALLITEMS.map(i=>[i.id,i]));
+const CMAP=Object.fromEntries(CATS.map(c=>[c.id,c]));
+
+// ── MIKRONÄHRSTOFFE per 100g/ml: [b12,vitD,vitC,eisen,calc,zink,omega3,folat,magnesium,vitA]
+const MICS={
+  huehn:[0.3,0,0,0.7,11,1.0,0.1,3,  28,11],   rind8:[2.5,0,0,2.5,18,4.0,0.1,8,  20,5],
+  rindf:[2.0,0,0,2.2,5, 3.5,0.1,10, 22,5],     ei:   [1.4,2.2,0,1.8,56,1.3,0.1,65,12,149],
+  lachs:[3.2,11,0,0.4,12,0.5,2.5,25,30,40],    sard:[8.9,4.8,0,2.9,382,1.3,0.5,10,39,30],
+  thun: [2.5,4.0,0,1.3,18,0.6,0.2,8, 35,25],   wolfb:[1.5,2.5,0,0.3,15,0.5,0.6,10,28,20],
+  tempeh:[0,0,0,2.7,111,1.1,0.1,24,81,0],      tofu: [0,0,0.1,1.8,350,0.8,0.3,15,58,0],
+  whey:  [0.3,0,0,0.2,600,1.0,0,5,  50,30],
+  harzer:[1.0,0,0,0.2,90,2.0,0,10,  11,50],    huett:[0.4,0,0,0.1,60,0.5,0,8,  11,40],
+  jogh:  [0.4,0,0,0.1,120,0.5,0,5,  14,27],    milchp:[0.4,0.1,0,0.1,120,0.4,0,5,12,46],
+  parm:  [1.5,0,0,0.9,1184,2.75,0,7,44,74],    skyr:  [0.5,0,0,0.1,115,0.5,0,5,15,30],
+  edamame:[0,0,6.1,2.3,63,1.4,0.4,311,64,8],   erbsen:[0,0,14,1.5,27,1.2,0.1,65,36,5],
+  kicher:[0,0,4.0,6.2,105,3.4,0.1,557,115,3],  kidney:[0,0,1.6,8.2,143,2.8,0.1,394,140,0],
+  linsen:[0,0,3.6,7.5,56,3.3,0.1,479,122,2],   schbohn:[0,0,0,8.7,123,3.7,0.1,444,120,0],
+  weibohn:[0,0,0,10.4,240,3.7,0.1,388,130,0],
+  kefir:[0.5,0,1,0.1,120,0.4,0,5,  14,27],     kombucha:[0,0,0,0.1,8,0.1,0,2,5,0],
+  sauerk:[0,0,30,1.5,30,0.2,0,24,  15,0],      gruentee:[0,0,0.5,0.1,3,0.1,0,10,3,0],
+  aubg:  [0,0,2.2,0.2,9,0.1,0,18,  14,1],      avoc:  [0,0,10,0.6,12,0.6,0.1,81,29,7],
+  blumk: [0,0,69,0.4,22,0.3,0,57,  15,0],      doset: [0,0,13,1.5,22,0.3,0,13,16,30],
+  gkohl: [0,0,120,1.5,150,0.4,0.1,141,34,681], ingw:  [0,0,5,0.6,16,0.3,0,11,43,0],
+  karr:  [0,0,6,0.4,33,0.2,0,20,   12,835],    kart:  [0,0,17,0.5,12,0.3,0,18,23,0],
+  knobl: [0,0,31,1.7,181,1.2,0,3,  25,0],      kohl:  [0,0,36,0.5,40,0.2,0,43,15,5],
+  kohlr: [0,0,62,0.4,24,0.2,0,16,  19,2],      kuerbis:[0,0,9,0.8,21,0.3,0,16,12,30],
+  lauch: [0,0,12,2.0,59,0.3,0,64,  28,50],     papr:  [0,0,128,0.5,10,0.2,0,20,12,120],
+  pommes:[0,0,8,0.8,14,0.5,0.1,18, 30,0],      rbeet: [0,0,5,0.8,16,0.4,0,109,23,0],
+  rosenk:[0,0,85,1.4,42,0.4,0.1,119,23,38],    sparg: [0,0,6,0.9,24,0.4,0,52,14,5],
+  spin:  [0,0,28,2.7,99,0.5,0.1,194,79,469],   swkart:[0,0,19,0.6,30,0.3,0,11,25,709],
+  tom:   [0,0,14,0.5,10,0.2,0,22,  11,42],     zucc:  [0,0,17,0.4,16,0.3,0,24,18,10],
+  zwieb: [0,0,7.4,0.2,23,0.2,0,19, 10,0],
+  apf:   [0,0,6,0.1,6,0.1,0,3,     5,3],       ban:   [0,0,9,0.3,5,0.1,0,20,27,3],
+  beer:  [0,0,10,0.3,10,0.1,0,10,  13,3],      grape: [0,0,34,0.1,17,0.1,0,12,9,5],
+  kiwi:  [0,0,93,0.3,34,0.1,0,25,  17,4],      mand:  [0,0,35,0.1,34,0.1,0,14,12,15],
+  mango: [0,0,37,0.1,11,0.1,0,43,  10,54],     melon: [0,0,28,0.2,9,0.1,0,21,12,17],
+  orang: [0,0,53,0.1,40,0.1,0,30,  10,11],     pflm:  [0,0,9.5,0.2,6,0.1,0,5,7,17],
+  trb:   [0,0,4,0.4,10,0.1,0,3,    7,3],
+  chic:  [0,0,3,0.4,22,0.2,0,37,   13,5],      felds: [0,0,35,2.0,38,0.5,0.1,145,13,202],
+  gurke: [0,0,2.8,0.3,16,0.2,0,7,  14,5],      radic: [0,0,8,0.5,19,0.2,0,60,15,0],
+  radies:[0,0,25,0.3,26,0.3,0,27,  10,0],      roman: [0,0,4,0.9,33,0.2,0,38,14,175],
+  rucol: [0,0,15,1.5,160,0.5,0.1,97,47,109],   spross:[0,0,15,0.8,13,0.3,0.1,98,25,5],
+  nussm: [0,0,0,3.0,130,2.5,2.0,40,200,0],     samenm:[0,0,0,5.0,280,4.0,15,60,350,0],
+  buchw: [0,0,0,2.2,18,2.4,0,30,   230,0],     dinkn: [0,0,0,3.5,20,2.5,0,50,45,0],
+  hafer: [0,0,0,4.7,54,3.6,0.1,56, 177,0],     nudeln:[0,0,0,1.5,17,0.8,0,20,25,0],
+  quinoa:[0,0,0,4.6,47,3.1,0.1,184,197,0],     roggen:[0,0,0,2.5,73,1.5,0,60,40,0],
+  sauertbrot:[0,0,0,2.0,25,1.0,0.1,30,35,0],
+  butter:[0.1,1.5,0,0.1,15,0.1,0.3,3,2,684],   kokosfett:[0,0,0,0.1,1,0.1,0,0,1,0],
+  olivenoel:[0,0,0,0.4,1,0,0.7,0,  0,0],
+  bier:  [0,0,0,0,5,0.1,0,3,       7,0],       negroni:[0,0,0,0.1,5,0,0,2,5,0],
+  vodka: [0,0,0,0,0,0,0,0,         0,0],       wein:   [0,0,0,0.5,8,0.1,0,3,12,0],
+  chips: [0,0,15,1.2,35,0.5,0.1,20,35,0],      eis:   [0.2,0.5,0.5,0.1,120,0.3,0.1,5,13,80],
+  kuchen:[0.1,0.1,0,0.5,30,0.3,0.1,10,14,50],  salzstange:[0,0,0,2.0,10,0.5,0,10,20,0],
+};
+const MIC_KEYS=["b12","vitd","vitc","eisen","calc","zink","omega3","folat","magnesium","vitA"];
+const MIC_GOALS={
+  b12:     {goal:2.4,  lbl:"Vitamin B12",  unit:"µg", icon:"🔵"},
+  vitd:    {goal:20,   lbl:"Vitamin D",    unit:"µg", icon:"☀️"},
+  vitc:    {goal:100,  lbl:"Vitamin C",    unit:"mg", icon:"🍊"},
+  eisen:   {goal:12,   lbl:"Eisen",        unit:"mg", icon:"🔴"},
+  calc:    {goal:1000, lbl:"Calcium",      unit:"mg", icon:"🦴"},
+  zink:    {goal:10,   lbl:"Zink",         unit:"mg", icon:"⚙️"},
+  omega3:  {goal:1.6,  lbl:"Omega-3",      unit:"g",  icon:"🐟"},
+  folat:   {goal:300,  lbl:"Folat (B9)",   unit:"µg", icon:"🌿"},
+  magnesium:{goal:375, lbl:"Magnesium",    unit:"mg", icon:"⚡"},
+  vitA:    {goal:800,  lbl:"Vitamin A",    unit:"µg", icon:"🥕"},
+};
+const MIC_TIPS={
+  b12:"Sardinen 🐟, Rinderhack 🥩 oder Eier 🥚",
+  vitd:"Lachs 🍣 oder Sardinen 🐟 öfter einbauen",
+  vitc:"Paprika 🫑, Kiwi 🥝 oder Blumenkohl 🥦",
+  eisen:"Weiße Bohnen ⚪, Samenmix 🌻 oder Spinat 🌿",
+  calc:"Parmesan 🧀, Tofu 🫘 oder Kefir 🥛",
+  zink:"Samenmix 🌻, Hafer 🌾 oder Nussmix 🥜",
+  omega3:"Samenmix 🌻 oder Lachs 🍣 einplanen",
+  folat:"Linsen 🟤, Kichererbsen 🟡 oder Feldsalat 🥗",
+  magnesium:"Nussmix 🥜, Samenmix 🌻 oder Hafer 🌾",
+  vitA:"Karotten 🥕, Grünkohl 🥬 oder Spinat 🌿",
+};
+// Health effects: [low effect, good effect]
+const MIC_FX={
+  b12:    ["Dauermüdigkeit, Konzentrationsprobleme & Kribbeln in Händen/Füßen möglich.",
+           "Starkes Nervensystem, gute Gedächtnisleistung & stabile Stimmung. 🧠"],
+  vitd:   ["Knochen verlieren Dichte, Immunsystem schwächelt, Stimmungstiefs häufen sich.",
+           "Feste Knochen, starke Abwehr & ausgeglichene Stimmung auch im Winter. ☀️"],
+  vitc:   ["Wunden heilen langsamer, Zahnfleisch wird empfindlich, Infekte kommen öfter.",
+           "Starkes Immunsystem, straffere Haut & bessere Aufnahme von Eisen aus Pflanzen. 🛡️"],
+  eisen:  ["Anhaltende Erschöpfung, Blässe & Konzentrationsschwäche durch weniger Sauerstoff.",
+           "Volle Energie, rosy cheeks & starke Muskeln – Blut versorgt alles optimal. 💪"],
+  calc:   ["Knochen werden auf Dauer brüchiger, Muskelkrämpfe & Zahnprobleme nehmen zu.",
+           "Festes Skelett, gesunde Zähne & ein ruhiger, gleichmäßiger Herzrhythmus. 🦴"],
+  zink:   ["Wunden heilen schlecht, Haarausfall & Abwehrkräfte sinken spürbar.",
+           "Schnelle Wundheilung, glänzende Haare & ein reaktionsschnelles Immunsystem. ✨"],
+  omega3: ["Chronische Entzündungen steigen, Herzrisiko erhöht sich, Haut wird trocken.",
+           "Schutz fürs Herz, weniger Entzündungen & bessere Gehirnfunktion. 🫀"],
+  folat:  ["Zellerneuerung stockt, Blutarmut droht & Herzrisiko kann langfristig steigen.",
+           "Gesunde Zellteilung, frischer Teint & besonders wichtig für Wachstum. 🌱"],
+  magnesium:["Muskelkrämpfe, Einschlafprobleme & höhere Stressanfälligkeit machen sich bemerkbar.",
+             "Erholsamer Schlaf, entspannte Muskeln & mehr innere Ruhe in stressigen Zeiten. 😴"],
+  vitA:   ["Nachtblindheit, trockene Haut & anfällige Schleimhäute als erste Zeichen.",
+           "Gute Sehkraft auch bei Dunkelheit, strahlende Haut & starke Schleimhäute. 👁️"],
+};
+
+let grams={},allDay={},expanded={},tab="today";
+let viewDay=new Date().toISOString().slice(0,10);
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+const ts=()=>new Date().toISOString().slice(0,10);
+const dk=d=>"ern3-"+d;
+const fd=s=>new Date(s+"T12:00:00").toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"});
+function wdays(){const n=new Date(),dw=n.getDay()===0?6:n.getDay()-1;return Array.from({length:7},(_,i)=>{const d=new Date(n);d.setDate(n.getDate()-dw+i);return d.toISOString().slice(0,10);});}
+function l30(){return Array.from({length:30},(_,i)=>{const d=new Date();d.setDate(d.getDate()-29+i);return d.toISOString().slice(0,10);});}
+function getWeekStart(off=0){const n=new Date(),dw=n.getDay()===0?6:n.getDay()-1;const m=new Date(n);m.setDate(n.getDate()-dw+off*7);return m.toISOString().slice(0,10);}
+function getWeekDaysFrom(s){const m=new Date(s+"T12:00:00");return Array.from({length:7},(_,i)=>{const d=new Date(m);d.setDate(m.getDate()+i);return d.toISOString().slice(0,10);});}
+function getISOWeek(d){const j=new Date(d.getFullYear(),0,1);return Math.ceil(((d-j)/86400000+j.getDay()+1)/7);}
+function cm(g){let kc=0,pr=0,kh=0,ft=0,fb=0;Object.entries(g||{}).forEach(([id,v])=>{const it=IMAP[id];if(!it||!v)return;kc+=v/100*it.kcal100;pr+=v/100*it.prot100;kh+=v/100*it.kh100;ft+=v/100*it.fett100;fb+=v/100*it.fib100;});return{kcal:Math.round(kc),protein:Math.round(pr),kh:Math.round(kh),fett:Math.round(ft),fiber:Math.round(fb)};}
+function ccm(cid,g){const c=CMAP[cid];let kc=0,pr=0;c.items.forEach(i=>{const v=g[i.id]||0;kc+=v/100*i.kcal100;pr+=v/100*i.prot100;});return{kcal:Math.round(kc),prot:Math.round(pr)};}
+function ccmProt(g){let kc=0,pr=0;PROTEIN_CATIDS.forEach(cid=>{CMAP[cid].items.forEach(i=>{const v=g[i.id]||0;kc+=v/100*i.kcal100;pr+=v/100*i.prot100;});});return{kcal:Math.round(kc),prot:Math.round(pr)};}
+function cmMic(g){const r={};MIC_KEYS.forEach(k=>r[k]=0);Object.entries(g||{}).forEach(([id,v])=>{if(!v||!MICS[id])return;MIC_KEYS.forEach((k,i)=>{r[k]+=v/100*MICS[id][i];});});return r;}
+function dayPortionFrac(cat,dg){return cat.items.reduce((s,i)=>s+(dg[i.id]||0)/(i.portionMin||100),0);}
+function catPortions(cat,days){return days.reduce((s,d)=>s+Math.floor(dayPortionFrac(cat,allDay[d]||{})),0);}
+
+// ── MIKRO-ANALYSE ─────────────────────────────────────────────────────────────
+// Show all 10 micronutrients sorted ascending by coverage %
+function buildMicAnalysis(days,minDays=3){
+  const valid=days.filter(d=>allDay[d]&&Object.keys(allDay[d]).length>0);
+  if(valid.length<minDays)return `<div class="wcard"><div class="wtit">🔬 Mikronährstoffe</div><div style="font-size:12px;color:#aaa;font-style:italic">Noch nicht genug Tage erfasst (mind. ${minDays}).</div></div>`;
+  const avg={};MIC_KEYS.forEach(k=>avg[k]=0);
+  valid.forEach(d=>{const m=cmMic(allDay[d]||{});MIC_KEYS.forEach(k=>avg[k]+=m[k]/valid.length);});
+  const sorted=MIC_KEYS.map(k=>({k,pct:Math.min(avg[k]/MIC_GOALS[k].goal,1.5)})).sort((a,b)=>a.pct-b.pct);
+  let h=`<div class="wcard"><div class="wtit">🔬 Mikronährstoffe <span style="font-weight:500;color:#bbb;letter-spacing:0;text-transform:none">(Ø ${valid.length} Tage)</span></div>`;
+  sorted.forEach(({k,pct})=>{
+    const g=MIC_GOALS[k];
+    const bar=Math.round(Math.min(pct,1)*100);
+    const ok=pct>=1;
+    const col=pct<0.5?"#b02010":pct<0.75?"#9a6000":pct<1?"#7a7000":"#1a7a40";
+    const bgCol=pct<0.5?"#fff4f3":pct<0.75?"#fff8f0":pct<1?"#fffde8":"#f0faf4";
+    const fillW=Math.min(bar,100);
+    const fx=MIC_FX[k];
+    const fxText=ok?fx[1]:fx[0];
+    const fxCol=ok?"#1a6030":"#666";
+    const fxIcon=ok?"✅":"⚠️";
+    h+=`<div style="background:${bgCol};border:2px solid ${col}33;border-radius:11px;padding:10px 12px;margin-bottom:8px;box-shadow:2px 2px 0 ${col}22">
+      <div class="mic-row" style="margin-bottom:5px">
+        <div class="mic-icon">${g.icon}</div>
+        <div class="mic-body">
+          <div class="mic-top">
+            <span class="mic-name" style="color:${col}">${g.lbl}</span>
+            <span class="mic-pct" style="color:${col}">${bar}%${ok?" ✓":""}</span>
+          </div>
+          <div class="mic-track" style="border-color:${col}88">
+            <div class="mic-fill" style="width:${fillW}%;background:${col}"></div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:${fxCol};line-height:1.5;padding-left:28px">${fxIcon} <em>${fxText}</em></div>
+      ${!ok?`<div style="font-size:10px;color:#888;margin-top:5px;padding-left:28px;font-weight:700">👉 Mehr: ${MIC_TIPS[k]}</div>`:""}
+    </div>`;
+  });
+  return h+`</div>`;
+}
+
+// ── WEEK MACRO CARD ───────────────────────────────────────────────────────────
+function buildWeekMacroCard(days){
+  const tots=days.map(d=>cm(allDay[d]||{}));
+  const valid=tots.filter(t=>t.kcal>0);
+  if(!valid.length)return "";
+  const avg={};MDEFS.forEach(d=>{avg[d.k]=Math.round(valid.reduce((s,t)=>s+t[d.k],0)/valid.length);});
+  const kp=Math.min(avg.kcal/GOALS.kcal*100,100),kdone=kp>=100;
+  let h=`<div class="wcard"><div class="wtit">⌀ Makros <span style="font-weight:500;color:#bbb;text-transform:none;letter-spacing:0">(${valid.length} Tage)</span></div>
+  <div class="mac-top"><div><span style="font-size:22px;font-weight:900;color:${kdone?"#c49a00":"#1a1a1a"}">${avg.kcal}</span> <span class="mac-kcal-goal">/ ${GOALS.kcal} kcal</span></div>
+  <span style="font-size:11px;font-weight:700;color:${kdone?"#c49a00":"#bbb"}">${kdone?"✅":Math.round(kp)+"%"}</span></div>
+  <div class="mac-kcal-bar" style="margin-bottom:12px"><div class="mac-kcal-fill" style="width:${kp}%"></div></div>
+  <div class="mac-grid">`;
+  MDEFS.filter(d=>d.k!=="kcal").forEach(d=>{
+    const v=avg[d.k],gv=GOALS[d.k],pp=Math.min(v/gv*100,100),dn=pp>=100;
+    h+=`<div><div class="mac-lbl"><span>${d.lbl}</span><b style="color:${dn?d.c:"#1a1a1a"}">${v}<span style="font-size:9px;font-weight:400;color:#aaa"> /${gv}${d.u}</span></b></div>
+      <div class="mac-bar"><div class="mac-fill" style="width:${pp}%;background:${d.c}"></div></div></div>`;
+  });
+  return h+`</div></div>`;
+}
+
+// ── PERSIST ───────────────────────────────────────────────────────────────────
+function save(){try{localStorage.setItem(dk(viewDay),JSON.stringify(grams));}catch(e){}allDay[viewDay]=grams;}
+function loadDay(d){try{const r=localStorage.getItem(dk(d));return r?JSON.parse(r):{};} catch(e){return {};}}
+function load(){l30().forEach(d=>{allDay[d]=loadDay(d);});grams=loadDay(viewDay);allDay[viewDay]=grams;}
+function hintSeen(){try{return!!localStorage.getItem("ern-h3");}catch(e){return false;}}
+function closeHint(){try{localStorage.setItem("ern-h3","1");}catch(e){}const b=document.getElementById("hb");if(b)b.remove();}
+
+// ── DAY NAV ───────────────────────────────────────────────────────────────────
+function shiftDay(n){
+  const d=new Date(viewDay+"T12:00:00");d.setDate(d.getDate()+n);
+  const nd=d.toISOString().slice(0,10);
+  if(nd>ts())return;
+  viewDay=nd;grams=loadDay(viewDay);allDay[viewDay]=grams;
+  updateDayHeader();renderContent();
+}
+function goToday(){viewDay=ts();grams=loadDay(viewDay);allDay[viewDay]=grams;updateDayHeader();renderContent();}
+function updateDayHeader(){
+  const isToday=viewDay===ts();
+  const d=new Date(viewDay+"T12:00:00");
+  document.getElementById("dlbl").textContent=isToday?"Heute – "+d.toLocaleDateString("de-DE",{day:"numeric",month:"long"}):d.toLocaleDateString("de-DE",{weekday:"short",day:"numeric",month:"long"});
+  document.getElementById("todaybtn").style.display=isToday?"none":"inline-block";
+  document.getElementById("nextday").style.opacity=isToday?"0.3":"1";
+  document.getElementById("nextday").style.pointerEvents=isToday?"none":"auto";
+  updMacros();
+}
+
+// ── MACRO HEADER ──────────────────────────────────────────────────────────────
+function initMacros(){
+  const m=cm(grams),kc=m.kcal,g=GOALS.kcal,p=Math.min(kc/g*100,100),done=p>=100;
+  let h=`<div class="mac-top">
+    <div><span class="mac-kcal" id="mvkcal" style="color:${done?"#c49a00":"#1a1a1a"}">${kc}</span> <span class="mac-kcal-goal">/ ${g} kcal</span></div>
+    <span style="font-size:11px;font-weight:700;color:${done?"#c49a00":"#bbb"}">${done?"✅ Ziel!":Math.round(p)+"%"}</span>
+  </div>
+  <div class="mac-kcal-bar"><div class="mac-kcal-fill" id="mfkcal" style="width:${p}%"></div></div>
+  <div class="mac-grid">`;
+  MDEFS.filter(d=>d.k!=="kcal").forEach(d=>{
+    const v=m[d.k],gv=GOALS[d.k],pp=Math.min(v/gv*100,100),dn=pp>=100;
+    h+=`<div><div class="mac-lbl"><span>${d.lbl}</span><b id="mv${d.k}" style="color:${dn?d.c:"#1a1a1a"}">${v}<span style="font-size:9px;font-weight:400;color:#aaa"> /${gv}${d.u}</span></b></div>
+      <div class="mac-bar"><div class="mac-fill" id="mf${d.k}" style="width:${pp}%;background:${d.c}"></div></div></div>`;
+  });
+  document.getElementById("macwrap").innerHTML=h+`</div>`;
+}
+function updMacros(){
+  const m=cm(grams),kc=m.kcal,g=GOALS.kcal,p=Math.min(kc/g*100,100),done=p>=100;
+  const ve=document.getElementById("mvkcal"),be=document.getElementById("mfkcal");
+  if(ve){ve.textContent=kc;ve.style.color=done?"#c49a00":"#1a1a1a";}
+  if(be)be.style.width=p+"%";
+  MDEFS.filter(d=>d.k!=="kcal").forEach(d=>{
+    const v=m[d.k],gv=GOALS[d.k],pp=Math.min(v/gv*100,100),dn=pp>=100;
+    const e=document.getElementById("mv"+d.k),f=document.getElementById("mf"+d.k);
+    if(e){e.innerHTML=`${v}<span style="font-size:9px;font-weight:400;color:#aaa"> /${gv}${d.u}</span>`;e.style.color=dn?d.c:"#1a1a1a";}
+    if(f)f.style.width=pp+"%";
+  });
+}
+
+function initTabs(){
+  document.getElementById("tabs").innerHTML=[["today","📅 Tag"],["week","📊 Woche"],["month","📆 Monat"]].map(([t,l])=>
+    `<button class="tbtn${tab===t?" on":""}" data-t="${t}">${l}</button>`).join("");
+}
+
+// ── TODAY ─────────────────────────────────────────────────────────────────────
+function iRowHTML(it,accent,ix){
+  const g=grams[it.id]||0,ac=g>0;
+  const ck=ac?Math.round(g/100*it.kcal100):0,cp=ac?Math.round(g/100*it.prot100*10)/10:0;
+  const isRaw=it.name.includes('roh')||it.name.includes('trocken');
+  const u=it.unit||(isRaw?"g roh":"g");
+  return `<div class="irow" id="ir${it.id}" style="${ix>0?"border-top:1.5px solid #ede9e2":""}${ac?";background:"+accent+"12":""}">
+    <span class="iemoji">${it.emoji}</span>
+    <div class="iname"><div class="ilbl" id="il${it.id}" style="color:${ac?"#1a1a1a":"#bbb"}">${it.name}</div></div>
+    <div class="icalc" id="ic${it.id}" style="${ac?"display:block":""}">
+      <div class="ick">${ck} kcal</div><div class="icp">${cp}g P</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+      <input class="iinp" type="number" inputmode="decimal" value="${g||""}" placeholder="${it.hint}"
+        data-iid="${it.id}" data-cid="${it.catId}" style="border-color:${ac?accent:"#ccc"}"/>
+      <span class="iunit" style="font-size:${isRaw||it.unit?"9px":"10px"}">${u}</span>
+    </div>
+  </div>`;
+}
+
+function buildToday(){
+  let h=hintSeen()?"":
+    `<div class="hintbanner" id="hb"><button class="hintclose" onclick="closeHint()">✕</button><strong>Als App speichern:</strong> In Safari öffnen → Teilen (□↑) → „Zum Home-Bildschirm"</div>`;
+
+  // ── Proteinquellen (combined) ──
+  const protCats=PROTEIN_CATIDS.map(id=>CMAP[id]);
+  const protHasAny=protCats.some(c=>c.items.some(i=>grams[i.id]>0));
+  const protM=ccmProt(grams);
+  const opProt=!!expanded[PROT_ID];
+  h+=`<div class="cc" id="cc${PROT_ID}" style="border-color:${protHasAny?PROT_ACCENT:"#1a1a1a"};box-shadow:4px 4px 0 ${protHasAny?PROT_ACCENT:"#1a1a1a"}">
+    <div class="ch" id="ch${PROT_ID}" data-cid="${PROT_ID}" style="background:${protHasAny?PROT_ACCENT+"15":"transparent"}">
+      <span class="cemoji">💪</span><span class="cname">Proteinquellen</span>
+      <span class="csum" id="cs${PROT_ID}" style="color:${PROT_ACCENT};${protM.kcal>0?"":"display:none"}">${protM.kcal} kcal · ${protM.prot}g P</span>
+      <span class="carr" id="ca${PROT_ID}" style="${opProt?"transform:rotate(180deg)":""}">▾</span>
+    </div>
+    <div class="citems${opProt?" open":""}" id="ci${PROT_ID}">`;
+  protCats.forEach(cat=>{
+    h+=`<div class="sub-hdr">${cat.emoji} ${cat.label}</div>`;
+    cat.items.forEach((it,ix)=>{h+=iRowHTML(it,PROT_ACCENT,ix);});
+  });
+  h+=`</div></div>`;
+
+  // ── All other categories ──
+  CATS.filter(c=>!PROTEIN_CATIDS.includes(c.id)).forEach(cat=>{
+    const m=ccm(cat.id,grams),ha=cat.items.some(i=>grams[i.id]>0),op=!!expanded[cat.id];
+    h+=`<div class="cc" id="cc${cat.id}" style="border-color:${ha?cat.accent:"#1a1a1a"};box-shadow:4px 4px 0 ${ha?cat.accent:"#1a1a1a"}">
+    <div class="ch" id="ch${cat.id}" data-cid="${cat.id}" style="background:${ha?cat.accent+"15":"transparent"}">
+      <span class="cemoji">${cat.emoji}</span><span class="cname">${cat.label}</span>
+      <span class="csum" id="cs${cat.id}" style="color:${cat.accent};${m.kcal>0?"":"display:none"}">${m.kcal} kcal · ${m.prot}g P</span>
+      <span class="carr" id="ca${cat.id}" style="${op?"transform:rotate(180deg)":""}">▾</span>
+    </div>
+    <div class="citems${op?" open":""}" id="ci${cat.id}">`;
+    cat.items.forEach((it,ix)=>{h+=iRowHTML(it,cat.accent,ix);});
+    h+=`</div></div>`;
+  });
+  return h;
+}
+
+function updRow(iid,cid){
+  const it=IMAP[iid],g=grams[iid]||0,ac=g>0;
+  const ck=ac?Math.round(g/100*it.kcal100):0,cp=ac?Math.round(g/100*it.prot100*10)/10:0;
+  const dot=document.getElementById("il"+iid),calc=document.getElementById("ic"+iid);
+  const inp=document.querySelector(`[data-iid="${iid}"]`),row=document.getElementById("ir"+iid);
+  const isProteinCat=PROTEIN_CATIDS.includes(cid);
+  const accent=isProteinCat?PROT_ACCENT:(CMAP[cid]?.accent||"#aaa");
+  if(dot)dot.style.color=ac?"#1a1a1a":"#bbb";
+  if(calc){calc.style.display=ac?"block":"none";calc.innerHTML=`<div class="ick">${ck} kcal</div><div class="icp">${cp}g P</div>`;}
+  if(inp)inp.style.borderColor=ac?accent:"#ccc";
+  if(row)row.style.background=ac?accent+"12":"transparent";
+  if(isProteinCat){
+    const pm=ccmProt(grams),ha=PROTEIN_CATIDS.some(id=>CMAP[id].items.some(i=>grams[i.id]>0));
+    const cs=document.getElementById("cs"+PROT_ID),ch=document.getElementById("ch"+PROT_ID),cc=document.getElementById("cc"+PROT_ID);
+    if(cs){cs.textContent=pm.kcal>0?pm.kcal+" kcal · "+pm.prot+"g P":"";cs.style.display=pm.kcal>0?"":"none";}
+    if(ch)ch.style.background=ha?PROT_ACCENT+"15":"transparent";
+    if(cc){cc.style.borderColor=ha?PROT_ACCENT:"#1a1a1a";cc.style.boxShadow=`4px 4px 0 ${ha?PROT_ACCENT:"#1a1a1a"}`;}
+  } else {
+    const cat=CMAP[cid];if(!cat)return;
+    const m=ccm(cid,grams),ha=cat.items.some(i=>grams[i.id]>0);
+    const cs=document.getElementById("cs"+cid),ch=document.getElementById("ch"+cid),cc=document.getElementById("cc"+cid);
+    if(cs){cs.textContent=m.kcal>0?m.kcal+" kcal · "+m.prot+"g P":"";cs.style.display=m.kcal>0?"":"none";}
+    if(ch)ch.style.background=ha?cat.accent+"15":"transparent";
+    if(cc){cc.style.borderColor=ha?cat.accent:"#1a1a1a";cc.style.boxShadow=`4px 4px 0 ${ha?cat.accent:"#1a1a1a"}`;}
+  }
+}
+
+// ── WEEK ──────────────────────────────────────────────────────────────────────
+function buildWeek(){
+  const days=wdays(),td=ts(),tots=days.map(d=>cm(allDay[d]||{}));
+  let h=`<div style="font-size:11px;color:#999;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:13px">${fd(days[0])} – ${fd(days[6])}</div>`;
+  h+=buildWeekMacroCard(days);
+  h+=buildMicAnalysis(days,3);
+  h+=`<div class="wcard"><div class="wtit">Kalorien pro Tag</div><div class="bchart">`;
+  tots.forEach((t,i)=>{
+    const p=Math.min(t.kcal/GOALS.kcal,1),isT=days[i]===td,ht=Math.max(p*50,t.kcal>0?5:0);
+    h+=`<div class="bcol"><div class="bnum" style="color:${isT?"#c49a00":"#ccc"}">${t.kcal>0?t.kcal:""}</div>
+      <div class="bbar" style="height:${ht}px;background:${isT?"#d4a800":t.kcal>0?"#1a1a1a":"#ede9e2"}"></div>
+      <div class="blbl${isT?" td":""}">${DNM[i]}</div></div>`;
+  });
+  h+=`</div></div><div class="wcard"><div class="wtit">Wochenziele</div>`;
+  CATS.forEach(cat=>{
+    const portions=catPortions(cat,days);
+    const pct=Math.min(cat.weekMax>0?portions/cat.weekMax*100:0,100);
+    const minPct=cat.weekMax>0?cat.weekMin/cat.weekMax*100:0;
+    let color;
+    if(cat.isTreat){color=portions>cat.weekMax?"#c04020":"#888";}
+    else{const ok=portions>=cat.weekMin&&portions<=cat.weekMax,over=portions>cat.weekMax;color=over?"#c04020":ok?"#1a7a40":portions>=cat.weekMin*0.5?"#8a7000":"#aa2020";}
+    h+=`<div class="wt-row"><div class="wt-head">
+      <span class="wt-emoji">${cat.emoji}</span><span class="wt-name">${cat.label}</span>
+      <span class="wt-num" style="color:${color}">${portions}</span>
+      <span class="wt-goal">${cat.isTreat?"max "+cat.weekMax+" P":cat.weekMin===cat.weekMax?cat.weekMin+" Portionen":cat.weekMin+"–"+cat.weekMax+" Portionen"}</span>
+    </div>
+    <div class="wt-track">
+      <div class="wt-fill" style="width:${pct}%;background:${color}"></div>
+      ${cat.weekMin>0?`<div class="wt-min-marker" style="left:${minPct}%"></div>`:""}
+    </div><div class="ddots">`;
+    days.forEach((d,i)=>{
+      const frac=dayPortionFrac(cat,allDay[d]||{});
+      const dc=frac>=1?cat.accent:frac>0?cat.accent+"66":"#ede9e2";
+      h+=`<div class="ddw"><div class="dd" style="background:${dc};border-color:${d===td?"#1a1a1a":"transparent"}"></div><div class="ddl${d===td?" td":""}">${DNM[i]}</div></div>`;
+    });
+    h+=`</div></div>`;
+  });
+  return h+`</div>`;
+}
+
+// ── MONTH ─────────────────────────────────────────────────────────────────────
+function buildMonth(){
+  const weeks=[];
+  for(let w=0;w<5;w++){const s=getWeekStart(-4+w),days=getWeekDaysFrom(s);weeks.push({days,label:w===4?"diese Wo.":"KW "+getISOWeek(new Date(s+"T12:00:00")),isCurrent:w===4});}
+  const td=ts(),dkc=l30().map(d=>cm(allDay[d]||{}).kcal),mk=Math.max(...dkc,GOALS.kcal);
+  let h=`<div class="slbl">Letzte 5 Wochen</div>`;
+  h+=buildMicAnalysis(l30(),7);
+  h+=`<div class="mcard"><div class="mctit">Kalorien-Verlauf (30 Tage)</div><div class="kstrip">`;
+  dkc.forEach((k,i)=>{const p=Math.min(k/mk,1),isT=l30()[i]===td,ht=Math.max(p*44,k>0?3:1);h+=`<div class="kbar" style="height:${ht}px;background:${isT?"#d4a800":k>0?"#1a1a1a":"#ede9e2"}"></div>`;});
+  h+=`</div><div class="slabs"><span class="slab">vor 30 Tagen</span><span class="slab" style="color:#1a1a1a">heute</span></div></div>`;
+  h+=`<div class="mcard"><div class="mctit">Wochenziele — Überblick</div><div class="month-week-hdrs">`;
+  weeks.forEach(w=>{h+=`<div class="mw-hdr">${w.label}</div>`;});h+=`</div>`;
+  CATS.forEach(cat=>{
+    h+=`<div class="month-row"><div class="month-cat-label" style="font-size:10px"><span>${cat.emoji}</span><span style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${cat.label}</span></div><div class="month-weeks">`;
+    weeks.forEach(w=>{
+      const portions=catPortions(cat,w.days);
+      const met=!cat.isTreat&&portions>=cat.weekMin,half=!cat.isTreat&&portions>=cat.weekMin*0.5&&!met,over=cat.isTreat&&portions>cat.weekMax,none=portions===0;
+      const bg=met?"#d0f0dc":over?"#fde0e0":half?"#fdf0c0":none?"#ede9e2":"#d0f0dc";
+      const tc=met?"#1a6030":over?"#aa2020":half?"#7a6000":"#bbb";
+      h+=`<div class="mw-cell" style="background:${bg};color:${tc};border:${w.isCurrent?`2.5px solid ${cat.accent}`:"1.5px solid #ccc"}">${none?"–":portions}</div>`;
+    });
+    h+=`</div></div>`;
+  });
+  h+=`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:2px solid #ede9e2">
+    ${[["#d0f0dc","#1a6030","Ziel ✓"],["#fdf0c0","#7a6000","Halb"],["#ede9e2","#bbb","Verpasst"],["#fde0e0","#aa2020","Zu viel"]].map(([bg,tc,lbl])=>`<div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;background:${bg}"></div><span style="font-size:10px;color:#555;font-weight:700">${lbl}</span></div>`).join("")}
+  </div></div>`;
+  return h;
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function attachHandlers(){
+  // Category toggle — handle protein separately
+  document.querySelectorAll(".ch").forEach(el=>{
+    el.addEventListener("click",()=>{
+      const cid=el.dataset.cid;
+      expanded[cid]=!expanded[cid];
+      const ci=document.getElementById("ci"+cid);
+      const ca=document.getElementById("ca"+cid);
+      if(ci)ci.classList.toggle("open",!!expanded[cid]);
+      if(ca)ca.style.transform=expanded[cid]?"rotate(180deg)":"rotate(0deg)";
+    });
+  });
+  // Input changes
+  document.getElementById("content").addEventListener("input",e=>{
+    const inp=e.target.closest(".iinp");if(!inp)return;
+    const iid=inp.dataset.iid,cid=inp.dataset.cid;
+    const v=parseFloat(inp.value);
+    if(v>0)grams[iid]=v;else delete grams[iid];
+    save();updRow(iid,cid);updMacros();
+  });
+}
+
+function renderContent(){
+  const el=document.getElementById("content");
+  if(tab==="today")el.innerHTML=buildToday();
+  else if(tab==="week")el.innerHTML=buildWeek();
+  else el.innerHTML=buildMonth();
+  attachHandlers();
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+load();updateDayHeader();initMacros();initTabs();renderContent();
+document.getElementById("prevday").addEventListener("click",()=>shiftDay(-1));
+document.getElementById("nextday").addEventListener("click",()=>shiftDay(1));
+document.getElementById("tabs").addEventListener("click",e=>{
+  const b=e.target.closest(".tbtn");if(!b)return;
+  tab=b.dataset.t;
+  document.querySelectorAll(".tbtn").forEach(x=>x.classList.toggle("on",x.dataset.t===tab));
+  renderContent();
+});
+</script>
+</body>
+</html>
